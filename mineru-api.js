@@ -3,7 +3,7 @@
  *
  * 提供完整的文件上传到CDN、转换为Markdown并下载的功能
  * 支持PDF、Word文档、图片等多种文件类型
- * 基于MinerU官方API实现
+ * 基于MinerU官方网页端服务实现
  */
 
 const fs = require('fs');
@@ -318,7 +318,7 @@ class FileDownloader {
 }
 
 /**
- * 文件预处理器 - 基于upload.js的uxe函数逻辑
+ * 文件预处理器
  * 处理页面范围、文件信息等预处理逻辑
  */
 class FilePreprocessor {
@@ -330,7 +330,7 @@ class FilePreprocessor {
                Math.random().toString(36).substring(2, 15);
     }
     /**
-     * 处理页面范围 - 模拟lxe函数的逻辑 (language-CwFR0Lce.js第73369行)
+     * 处理页面范围
      * @param {Array} pageRanges - 页面范围数组，如 [1, 2, 3, 5, 6, 7]
      * @returns {String} - 格式化的页面范围字符串，如 "1-3,5-7"
      */
@@ -361,7 +361,7 @@ class FilePreprocessor {
         return ranges.join(',');
     }
     /**
-     * 创建任务元数据 - 基于uxe函数第73350-73363行
+     * 创建任务元数据
      * @param {Array} files - 文件数组
      * @param {Object} params - 参数对象
      * @returns {Array} - 任务元数据数组
@@ -384,7 +384,7 @@ class FilePreprocessor {
 }
 
 /**
- * Batch API客户端 - 模拟Bue函数 (language-CwFR0Lce.js第47492行)
+ * Batch API客户端
  * 用于获取CDN上传URL
  */
 class BatchAPIClient {
@@ -422,7 +422,7 @@ class BatchAPIClient {
         console.log(`🔑 Auth Token: ${this.authToken.substring(0, 20)}...`);
     }
     /**
-     * 获取文件上传URL - 模拟Bue函数
+     * 获取文件上传URL
      * @param {Object} payload - 请求载荷
      * @returns {Promise} - 包含上传URL和任务ID的响应
      */
@@ -453,7 +453,7 @@ class BatchAPIClient {
         }
     }
     /**
-     * 查询任务进度 - 基于B_e函数 (language-CwFR0Lce.js第64712行)
+     * 查询任务进度
      * @param {String} taskId - 任务ID
      * @returns {Promise} - 任务状态信息
      */
@@ -480,7 +480,7 @@ class BatchAPIClient {
     }
 }
 /**
- * CDN文件上传器 - 模拟Tue函数 (language-CwFR0Lce.js第47502行)
+ * CDN文件上传器
  * 直接上传文件到CDN，支持多种文件类型的自动Content-Type检测
  * 使用原生https模块避免axios的自动Content-Type设置问题
  */
@@ -551,7 +551,6 @@ class CDNFileUploader {
                     console.log(`📄 从路径提取文件名: ${fileName}`);
                 }
             }
-            // 使用axios上传，与原始代码保持一致 - 基于Tue函数第47504行
             const response = await axios.put(uploadUrl, fileData, {
                 headers: {
                     'Content-Type': contentType
@@ -660,7 +659,7 @@ class TaskProgressMonitor {
 }
 
 /**
- * 完整的文件上传器 - 模拟Po函数(uxe) (language-CwFR0Lce.js第73348行)
+ * 完整的文件上传器
  * 实现完整的两阶段上传流程：获取上传URL → 上传文件到CDN
  * 支持PDF、Word文档、图片等多种文件类型
  */
@@ -694,7 +693,7 @@ class MineruFileUploader {
         this.concurrencyController = new ConcurrencyController(this.config.maxConcurrency);
     }
     /**
-     * 完整的文件上传流程 - 完全基于uxe函数逻辑 (language-CwFR0Lce.js第73348行)
+     * 完整的文件上传流程
      * @param {Object} uploadParams - 上传参数 {params, files, onCreateTaskSuccess, onProgress, pageRangeList, onUploadSuccess}
      * @returns {Promise} 上传结果
      */
@@ -739,9 +738,9 @@ class MineruFileUploader {
             uploadParams._validationResults = validationResults;
         }
         try {
-            // 第一步：创建任务元数据 - 基于uxe函数第73350-73363行
+            // 第一步：创建任务元数据
             const taskMetadata = FilePreprocessor.createTaskMetadata(finalFiles, params);
-            // 第二步：构建Batch API请求载荷 - 基于uxe函数第73364-73370行
+            // 第二步：构建Batch API请求载荷
             // 重要：使用与任务元数据相同的data_id，确保API能正确关联任务
             const batchPayload = {
                 ...this.config.defaultParams,
@@ -753,20 +752,20 @@ class MineruFileUploader {
                         FilePreprocessor.formatPageRanges(pageRangeList[index]) : ""
                 }))
             };
-            // 第三步：调用Batch API获取上传URL - 基于uxe函数第73364行调用Bue
+            // 第三步：调用Batch API获取上传URL
             const batchResponse = await this.batchClient.getFileUrls(batchPayload);
             if (!batchResponse) {
                 throw new Error('获取上传URL失败');
             }
-            // 第四步：合并任务信息和上传URL - 基于uxe函数第73374-73378行
+            // 第四步：合并任务信息和上传URL
             const uploadTasks = taskMetadata.map((task, index) => ({
                 ...task,
                 upload_url: batchResponse.file_urls?.[index],
                 task_id: batchResponse.task_ids?.[index] // API会返回真实的task_ids
             }));
-            // 第五步：调用成功回调 - 基于uxe函数第73379行
+            // 第五步：调用成功回调
             onCreateTaskSuccess?.(uploadTasks, batchResponse.batch_id);
-            // 第六步：并发上传文件到CDN - 基于uxe函数第73384-73403行
+            // 第六步：并发上传文件到CDN
             const uploadPromises = uploadTasks.map((task, index) => {
                 const file = finalFiles[index];
                 const validationResult = uploadParams._validationResults?.[index];
@@ -802,7 +801,7 @@ class MineruFileUploader {
                     })
                 );
             });
-            // 第七步：等待所有文件上传完成 - 基于uxe函数第73405-73411行
+            // 第七步：等待所有文件上传完成
             await Promise.all(uploadPromises);
             console.log("🎉 所有文件上传成功");
             return {
