@@ -92,7 +92,7 @@ docker rm mineru-api
 docker inspect --format='{{.State.Health.Status}}' mineru-api
 
 # 测试API接口
-curl http://localhost:7917/health
+curl http://localhost:8000/health
 ```
 
 ### 本地开发
@@ -322,14 +322,14 @@ print(f'Markdown URL: {result["data"]["markdownUrl"]}')
 # 基础运行
 docker run -d \
   --name mineru-api \
-  -p 7917:8000 \
+  -p 8000:8000 \
   -v $(pwd)/config.json:/app/config.json \
   mineru-api
 
 # 生产环境配置
 docker run -d \
   --name mineru-api \
-  -p 7917:8000 \
+  -p 8000:8000 \
   -e NODE_ENV=production \
   -e RATE_LIMIT=20 \
   -e ALLOWED_ORIGINS=https://yourdomain.com \
@@ -483,7 +483,7 @@ cp config.example.json config.json
 
 # 3. Docker部署
 docker build -t mineru-api .
-docker run -d --name mineru-api -p 7917:8000 -v $(pwd)/config.json:/app/config.json mineru-api
+docker run -d --name mineru-api -p 8000:8000 -v $(pwd)/config.json:/app/config.json mineru-api
 ```
 
 ## 🤝 贡献
