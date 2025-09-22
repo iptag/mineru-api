@@ -42,8 +42,8 @@ nano config.json  # 或使用其他编辑器
 
 **重要**:
 - 请将 `authToken` 替换为您的有效token
+- authToken获取方法：登录MinerU后，f12随便打开一个js文件，获取Cookie中的uaa-token=后面的字符串，到第一个';'截至，不要复制多了
 - token可能会定期过期，需要及时更新config.json文件
-- 不要将包含真实token的config.json提交到版本控制系统
 
 ### 使用 Docker（推荐）
 
