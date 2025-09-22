@@ -1,0 +1,8 @@
+{
+  "mineru": {
+    "authToken": "Bearer your-auth-token-here",
+    "baseURL": "https://mineru.org.cn/api/v4",
+    "timeout": 30000,
+    "maxConcurrency": 6
+  }
+}

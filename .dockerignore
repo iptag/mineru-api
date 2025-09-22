@@ -1,0 +1,59 @@
+# Node.js
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 日志文件
+logs
+*.log
+
+# 临时文件
+temp
+*.tmp
+*.temp
+
+# 文件夹
+output
+examples
+
+# 环境变量文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE 文件
+.vscode
+.idea
+*.swp
+*.swo
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Docker
+docker-compose.yml
+.dockerignore
+
+# 文档
+README.md
+*.md
+
+# 测试文件
+test
+tests
+*.test.js
+*.spec.js
+
+# 覆盖率报告
+coverage
+
+# 其他
+.nyc_output
