@@ -13,6 +13,7 @@
 - 🐳 **Docker 部署**: 一键部署，开箱即用
 - 🛡️ **安全可靠**: 文件类型验证、大小限制、速率限制
 - 📈 **监控友好**: 健康检查、结构化日志、错误处理
+- 🔥 **配置热重载**: 修改 `config.json` 后无需重启，配置即可自动生效（使用Docker Compose时）
 
 ## ⚠ 风险警告
 
@@ -52,7 +53,15 @@ nano config.json  # 或使用其他编辑器
 -  `token`获取方法：登录MinerU后，f12随便打开一个js文件，获取Cookie中的uaa-token=后面的字符串，到第一个;截至，不要复制多了
 - token可能会定期过期，需要及时更新config.json文件
 
-### 使用 Docker（推荐）
+### 使用 Docker Compose（推荐）
+
+项目已配置 `docker-compose.yml`，极大简化了部署流程，并默认开启了 **配置热重载** 功能。
+
+**优点**:
+- **一键启动**: 使用单个命令即可构建、启动和连接所有服务。
+- **配置热重载**: 在本地修改 `config.json` 文件并保存，应用会自动加载新配置，无需重启容器。当你需要更新过期的 `authToken` 时，这个功能非常方便。
+
+**步骤**:
 
 ```bash
 # 1. 克隆项目
@@ -60,34 +69,22 @@ git clone <repository-url>
 cd mineru-api
 
 # 2. 配置认证token
-# 编辑 config.json 文件，替换其中的 authToken
+# 编辑 config.json 文件，将 your-auth-token-here 替换为你的有效token。
 
-# 3. 构建Docker镜像
-docker build -t mineru-api .
+# 3. 构建并启动服务
+# --build 参数会在首次启动或代码变更后重新构建镜像
+docker-compose up --build -d
 
-# 4. 创建输出目录（可选）
-mkdir -p output
+# 4. 查看日志
+# 你可以在日志中看到服务启动和配置加载的信息
+docker-compose logs -f
 
-# 5. 运行容器
-docker run -d \
-  --name mineru-api \
-  -p 8000:8000 \
-  -v /root/mineru/config.json:/app/config.json \
-  -v /root/mineru/output:/app/output \
-  --restart unless-stopped \
-  mineru-api
+# 5. 测试热重载
+# 在本地编辑器中修改 config.json (例如更改 timeout 值) 并保存。
+# 再次查看日志 (docker-compose logs -f)，你会看到一条消息提示配置已成功热重载。
 
-# 6. 查看容器状态
-docker ps
-
-# 7. 查看日志
-docker logs -f mineru-api
-
-# 8. 停止容器
-docker stop mineru-api
-
-# 9. 删除容器
-docker rm mineru-api
+# 6. 停止服务
+docker-compose down
 ```
 
 ### 健康检查

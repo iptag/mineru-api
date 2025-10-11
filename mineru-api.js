@@ -383,18 +383,27 @@ class FilePreprocessor {
     }
 }
 
+const chokidar = require('chokidar');
+
 /**
  * Batch API客户端
  * 用于获取CDN上传URL
  */
 class BatchAPIClient {
     constructor(config = {}) {
-        // 尝试从配置文件读取配置
+        this.configPath = path.join(__dirname, 'config.json');
+        this.passedInConfig = config;
+        this.loadConfig();
+
+        // 初始化并监视配置文件变化
+        this.initializeWatcher();
+    }
+
+    loadConfig() {
         let fileConfig = {};
         try {
-            const configPath = path.join(__dirname, 'config.json');
-            if (fs.existsSync(configPath)) {
-                const configData = fs.readFileSync(configPath, 'utf8');
+            if (fs.existsSync(this.configPath)) {
+                const configData = fs.readFileSync(this.configPath, 'utf8');
                 const parsedConfig = JSON.parse(configData);
                 fileConfig = parsedConfig.mineru || {};
                 console.log('✅ 成功加载配置文件');
@@ -402,25 +411,60 @@ class BatchAPIClient {
                 console.warn('⚠️ 配置文件 config.json 不存在，使用默认配置');
             }
         } catch (error) {
-            console.error('❌ 读取配置文件失败:', error.message);
+            console.error('❌ 读取或解析配置文件失败:', error.message);
             console.warn('⚠️ 将使用默认配置或传入的配置参数');
         }
 
         // 配置优先级：传入参数 > 配置文件 > 默认值
-        this.baseURL = config.baseURL || fileConfig.baseURL || 'https://mineru.org.cn/api/v4';
-        this.timeout = config.timeout || fileConfig.timeout || 30000;
-        this.authToken = config.authToken || fileConfig.authToken;
+        this.baseURL = this.passedInConfig.baseURL || fileConfig.baseURL || 'https://mineru.org.cn/api/v4';
+        this.timeout = this.passedInConfig.timeout || fileConfig.timeout || 30000;
+        this.authToken = this.passedInConfig.authToken || fileConfig.authToken;
 
         // 验证必要的配置
         if (!this.authToken) {
-            throw new Error('❌ 缺少认证token！请在config.json中配置authToken或通过构造函数参数传入');
+            // 仅在启动时抛出错误，重载失败时只打印警告
+            if (!this.isReloading) {
+                throw new Error('❌ 缺少认证token！请在config.json中配置authToken或通过构造函数参数传入');
+            } else {
+                console.error('❌ 热重载失败：配置文件中缺少authToken');
+            }
         }
 
-        console.log('🔧 BatchAPIClient配置完成');
-        console.log(`📍 Base URL: ${this.baseURL}`);
-        console.log(`⏱️ Timeout: ${this.timeout}ms`);
-        console.log(`🔑 Auth Token: ${this.authToken.substring(0, 20)}...`);
+        if (!this.isReloading) {
+            console.log('🔧 BatchAPIClient配置完成');
+            console.log(`📍 Base URL: ${this.baseURL}`);
+            console.log(`⏱️ Timeout: ${this.timeout}ms`);
+            console.log(`🔑 Auth Token: ${this.authToken ? this.authToken.substring(0, 20) + '...' : '未设置'}`);
+        }
     }
+
+    initializeWatcher() {
+        const watcher = chokidar.watch(this.configPath, {
+            persistent: true,
+            ignoreInitial: true
+        });
+
+        watcher.on('change', (path) => {
+            console.log(`🔄 检测到配置文件 ${path} 发生变化，正在热重载...`);
+            this.isReloading = true;
+            try {
+                this.loadConfig();
+                console.log('✅ 配置文件热重载成功！');
+                console.log(`   - Base URL: ${this.baseURL}`);
+                console.log(`   - Timeout: ${this.timeout}ms`);
+                console.log(`   - Auth Token: ${this.authToken ? this.authToken.substring(0, 20) + '...' : '未设置'}`);
+            } catch (error) {
+                console.error('❌ 配置文件热重载失败:', error.message);
+            } finally {
+                this.isReloading = false;
+            }
+        });
+
+        watcher.on('error', (error) => {
+            console.error('❌ 文件监视器发生错误:', error);
+        });
+    }
+
     /**
      * 获取文件上传URL
      * @param {Object} payload - 请求载荷
