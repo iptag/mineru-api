@@ -141,7 +141,7 @@ router.post('/convert', upload, handleUploadError, async (req, res) => {
             is_ocr: options.is_ocr !== undefined ? options.is_ocr : false,
             enable_formula: options.enable_formula !== undefined ? options.enable_formula : true,
             enable_table: options.enable_table !== undefined ? options.enable_table : true,
-            model_version: options.model_version || "v2",
+            model_version: options.model_version || "vlm",
             language: options.language || null,
             is_chem: options.is_chem !== undefined ? options.is_chem : false
         };

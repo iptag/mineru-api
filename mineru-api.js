@@ -377,7 +377,7 @@ class FilePreprocessor {
                 url: "",
                 data_id: dataId,
                 tmp_id: dataId,
-                model_version: params.model_version || "v2"
+                model_version: params.model_version || "vlm"
             };
         });
     }
@@ -722,7 +722,7 @@ class MineruFileUploader {
                 is_ocr: false,
                 enable_formula: true,
                 enable_table: true,
-                model_version: "v2",
+                model_version: "vlm",
                 language: null,
                 is_chem: false
             },
