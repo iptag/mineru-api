@@ -91,6 +91,61 @@ docker stop mineru-api
 docker rm mineru-api
 ```
 
+### 使用 Docker Compose（更简单）
+
+项目提供了 `docker-compose.yml` 文件，可以更方便地管理容器：
+
+```bash
+# 1. 克隆项目
+git clone <repository-url>
+cd mineru-api
+
+# 2. 配置认证token
+# 编辑 config.json 文件，替换其中的 authToken
+
+# 3. 修改 docker-compose.yml 中的挂载路径（可选）
+# 默认挂载路径为 /root/mineru/，根据实际情况修改
+
+# 4. 构建并启动服务
+docker-compose up -d --build
+
+# 5. 查看日志
+docker-compose logs -f
+
+# 6. 停止服务
+docker-compose down
+```
+
+**docker-compose.yml 配置说明**：
+
+```yaml
+version: '3.8'
+
+services:
+  mineru-api:
+    container_name: mineru-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mineru-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - /root/mineru/config.json:/app/config.json  # 配置文件挂载
+      - /root/mineru/output:/app/output            # 输出目录挂载
+    restart: unless-stopped
+```
+
+**自定义配置**：
+
+根据实际部署环境，修改 `volumes` 中的挂载路径：
+
+```yaml
+volumes:
+  - ./config.json:/app/config.json      # 使用当前目录的配置文件
+  - ./output:/app/output                # 使用当前目录的输出目录
+```
+
 ### 健康检查
 
 容器启动后，可以通过以下命令检查服务状态：

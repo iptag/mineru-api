@@ -29,31 +29,44 @@ def convert_pdf_to_md():
         print(f"错误: 输入目录不存在: {INPUT_DIR}")
         return
 
-    pdf_files = list(input_path.glob('*.pdf'))
-    
-    if not pdf_files:
+    all_pdf_files = list(input_path.glob('*.pdf'))
+
+    if not all_pdf_files:
         print(f"在 {INPUT_DIR} 中未找到 PDF 文件。")
         return
 
-    print(f"共找到 {len(pdf_files)} 个 PDF 文件，准备开始转换...")
+    print(f"共找到 {len(all_pdf_files)} 个 PDF 文件")
+
+    # 3. 检查并剔除已存在同名 Markdown 的文件
+    pdf_files = []
+    skipped_files = []
+    for pdf_file in all_pdf_files:
+        md_filename = pdf_file.stem + '.md'
+        target_file = output_path / md_filename
+        if target_file.exists():
+            skipped_files.append(pdf_file.name)
+        else:
+            pdf_files.append(pdf_file)
+
+    if skipped_files:
+        print(f"跳过 {len(skipped_files)} 个已转换的文件:")
+        for name in skipped_files:
+            print(f"   - {name}")
+
+    if not pdf_files:
+        print("\n所有文件均已转换，无需处理。")
+        return
+
+    print(f"\n待转换: {len(pdf_files)} 个文件")
     print(f"API 地址: {API_URL}\n")
 
     success_count = 0
     fail_count = 0
 
-    # 3. 遍历处理
+    # 4. 遍历处理
     for index, pdf_file in enumerate(pdf_files, 1):
         print(f"[{index}/{len(pdf_files)}] 正在处理: {pdf_file.name}")
-        
-        # 检查目标 Markdown 文件是否已存在
-        md_filename = pdf_file.stem + '.md'
-        target_file = output_path / md_filename
-        if target_file.exists():
-            print(f"   ℹ️  目标文件 '{md_filename}' 已存在，跳过转换。")
-            # 严格来说这不算失败，但我们不增加成功计数，可以将其视为“未处理”或“跳过”
-            # 为保持计数逻辑清晰，这里不修改 success_count 或 fail_count
-            continue
-        
+
         try:
             # 准备文件和参数
             # mode='rb' 以二进制模式读取
