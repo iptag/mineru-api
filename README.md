@@ -185,7 +185,6 @@ POST /api/convert
   "is_ocr": false,           // 是否启用OCR（图片推荐true）
   "enable_formula": true,    // 是否识别数学公式
   "enable_table": true,      // 是否识别表格
-  "language": "zh-CN",       // 语言设置
   "is_chem": false          // 是否为化学文档
 }
 ```
