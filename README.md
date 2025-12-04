@@ -309,6 +309,7 @@ async function convertDocument(filePath) {
 ### Python 示例
 
 ```python
+import json
 import requests
 
 def convert_document(file_path, options=None):
